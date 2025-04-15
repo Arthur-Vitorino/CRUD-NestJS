@@ -1,0 +1,25 @@
+### list uf
+GET http://localhost:3000/uf
+
+### get uf  
+GET http://localhost:3000/uf/1
+
+### create uf
+POST http://localhost:3000/uf
+Content-Type: application/json
+
+{
+    "name": "Distrito Federal",
+    "sigla": "DF"
+}
+
+### update uf
+PATCH http://localhost:3000/uf/1
+Content-Type: application/json
+
+{
+    "sigla": "DP"
+}
+
+### delete uf
+DELETE http://localhost:3000/uf/1

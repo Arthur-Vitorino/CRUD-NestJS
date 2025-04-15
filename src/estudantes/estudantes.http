@@ -1,0 +1,28 @@
+### list estudantes
+GET http://localhost:3000/estudantes
+
+### get estudantes
+GET http://localhost:3000/estudantes/2
+
+### create estudantes
+POST http://localhost:3000/estudantes
+Content-Type: application/json
+
+{
+    "nome": "Arthur Ribeiro",
+    "matricula": "UC2025",
+    "email": "exemplo@gmail.com",
+    "dt_nascimento": "2005-01-01",
+    "cidade_id": 1
+}
+
+### update estudantes
+PATCH http://localhost:3000/estudantes/2
+Content-Type: application/json
+
+{
+    "email": "exemploalterado@gmail.com"
+}
+
+### delete estudantes
+DELETE http://localhost:3000/estudantes/2

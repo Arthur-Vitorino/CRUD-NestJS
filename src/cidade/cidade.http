@@ -1,0 +1,26 @@
+### list cidades
+GET http://localhost:3000/cidade
+
+### get cidade
+GET http://localhost:3000/cidade/2
+
+### create cidade
+POST http://localhost:3000/cidade
+Content-Type: application/json
+
+{
+    "name": "camacari",
+    "uf_id": 1
+}
+
+### update cidade
+PATCH http://localhost:3000/cidade/2
+Content-Type: application/json
+
+{
+    "name": "outroNomeCidade"
+    // "uf_id": 2
+}
+
+### delete cidade
+DELETE http://localhost:3000/cidade/2
