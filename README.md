@@ -1,98 +1,103 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# API de Exemplo com NestJS, TypeORM e SQLite
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este projeto é uma API RESTful criada com NestJS e banco de dados SQLite, seguindo boas práticas de organização de código, validação de dados e uso de injeção de dependência. O objetivo é servir como exemplo básico para criação de APIs escaláveis e bem estruturadas com NestJS.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Alunos Participantes:
+- Arthur Ribeiro Vitorino uc23100894
+- Anna Júlia Cúrcio Marques uc23100363
+- Débora Rezende Valeriano uc22201300
+- Ana Carolina de Andrade Silva uc23100955
 
-## Description
+## Introdução
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Este projeto demonstra como construir uma API REST utilizando o framework [NestJS](https://nestjs.com/), com suporte a banco de dados SQLite via [TypeORM](https://typeorm.io/). Ele inclui validação de dados, organização em módulos, uso correto de services e controllers, e segue boas práticas REST.
 
-## Project setup
+---
+
+## Criando o projeto
+
+Para iniciar um novo projeto NestJS, foi utilizado o CLI do Nest:
 
 ```bash
-$ npm install
+npm i -g @nestjs/cli
+nest new minha-api
 ```
+O projeto é gerado com estrutura padrão contendo src, main.ts, app.module.ts, entre outros arquivos principais.
 
-## Compile and run the project
-
+## Criando a API com o gerador de código
+Utilizamos os comandos do Nest CLI para gerar a estrutura do recurso:
 ```bash
-# development
-$ npm run start
+nest g resource estudantes
+```
+O comando acima criou os arquivos de controller, service, module, dto e entity para o recurso clientes.
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+## Validação de dados
+A validação foi feita com a biblioteca class-validator. No DTO de criação (create-cliente.dto.ts), foram usados decorators como:
+```typescript
+@IsString()
+@IsNotEmpty()
+```
+Além disso, o ValidationPipe foi aplicado globalmente no main.ts:
+```typescript
+app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 ```
 
-## Run tests
-
+## TypeORM e SQLite
+Para persistência dos dados, foi usado o TypeORM com banco SQLite.
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install --save @nestjs/typeorm typeorm sqlite3
+```
+Configuração no app.module.ts:
+```typescript
+TypeOrmModule.forRoot({
+  type: 'sqlite',
+  database: 'db.sqlite',
+  entities: [Cliente],
+  synchronize: true,
+}),
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+## Injeção de dependência
+O NestJS utiliza injeção de dependência para instanciar e gerenciar seus serviços. No caso, o ClientesService é injetado no ClientesController automaticamente via construtor:
+```typescript
+constructor(private readonly clientesService: ClientesService) {}
+```
+O repositório do TypeORM também é injetado no service usando o @InjectRepository():
+```typescript
+constructor(
+  @InjectRepository(Cliente)
+  private readonly clienteRepository: Repository<Cliente>,
+) {}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Lógica na Service
+```typescript
+async create(createClienteDto: CreateClienteDto): Promise<Cliente> {
+  const cliente = this.clienteRepository.create(createClienteDto);
+  return this.clienteRepository.save(cliente);
+}
+```
+O controller apenas delega as responsabilidades ao service, mantendo o código limpo e testável.
 
-## Resources
+## Bônus: boas práticas REST
+- Uso correto de métodos HTTP (GET, POST, PATCH, DELETE)
+- Rotas padronizadas: /clientes, /clientes/:id
+- Respostas com os códigos de status adequados (200, 201, 404, etc.)
+- Separação clara entre controller, service, DTO e entity
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## Próximos passos
+- Substituir SQLite por PostgreSQL ou MySQL
+- Adicionar autenticação JWT com @nestjs/passport
+- Implementar testes unitários e de integração
+- Adicionar paginação e filtros nas listagens
+- Documentar a API com Swagger
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Desafio!
+Implemente um novo recurso chamado produtos, seguindo a mesma estrutura usada para clientes. O recurso deve conter:
+- DTO com validações
+- Entidade com campos como nome, preco e estoque
+- Endpoints de CRUD (GET, POST, PATCH, DELETE)
+- Lógica isolada na service
+---
